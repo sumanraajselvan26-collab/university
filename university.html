@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>University Portal Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #00d2ff;
+    --primary-dark: #00a8cc;
+    --bg-dark: #0b132b;
+    --sidebar-width: 260px;
+    --glass: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+body {
+    background: radial-gradient(circle at top left, #1c2541, #0b132b);
+    color: #f0f0f0;
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+}
+
+.hidden { display: none !important; }
+
+.sidebar {
+    width: var(--sidebar-width);
+    background: rgba(11, 19, 43, 0.95);
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--glass-border);
+    position: fixed;
+    height: 100vh;
+    z-index: 100;
+}
+
+.sidebar h2 { 
+    font-size: 1.5rem; 
+    margin-bottom: 40px; 
+    color: var(--primary);
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.sidebar button {
+    background: none; border: none; color: #b0b0b0;
+    padding: 14px 18px; text-align: left;
+    cursor: pointer; border-radius: 12px;
+    margin-bottom: 8px; transition: 0.3s;
+    font-weight: 500;
+}
+
+.sidebar button.active {
+    background: var(--primary);
+    color: #0b132b;
+    box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
+}
+
+.sidebar button:hover:not(.active) {
+    background: var(--glass);
+    color: #fff;
+    padding-left: 25px;
+}
+
+.main { 
+    flex: 1; 
+    margin-left: var(--sidebar-width);
+    padding: 40px; 
+    max-width: 1000px;
+}
+
+.card {
+    background: var(--glass);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp { 
+    from { opacity: 0; transform: translateY(20px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+h3 { margin-bottom: 20px; font-weight: 600; color: var(--primary); }
+
+input, select {
+    width: 100%;
+    padding: 12px 16px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    outline: none;
+    transition: 0.3s;
+}
+
+input:focus { border-color: var(--primary); background: rgba(255,255,255,0.1); }
+
+button.primary {
+    background: linear-gradient(135deg, var(--primary), #3a7bd5);
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+    transition: 0.3s;
+}
+
+button.primary:hover { 
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
+}
+
+#taskList { list-style: none; margin-top: 20px; }
+#taskList li {
+    background: rgba(255,255,255,0.03);
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.task-done { opacity: 0.5; text-decoration: line-through; border-left: 4px solid #00ff9f; }
+
+.clock { font-size: 3rem; font-weight: 700; text-align: center; margin-bottom: 15px; text-shadow: 0 0 20px var(--primary); }
+#timerOut { font-size: 2rem; color: var(--primary); text-align: center; margin-top: 15px; font-weight: bold; }
+
+#marks { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 15px; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th { background: rgba(255,255,255,0.1); color: var(--primary); }
+td, th { padding: 12px; text-align: center; border-bottom: 1px solid var(--glass-border); }
+.fail { color: #ff5c5c; font-weight: bold; }
+
+#loginScreen {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #0b132b;
+    position: fixed;
+    top: 0; left: 0; z-index: 1000;
+}
+
+.alert { position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; padding: 12px 20px; border-radius: 10px; z-index: 2000; }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+ <div class="card" style="width: 380px;">
+  <h2 style="text-align:center; margin-bottom:25px;">University Portal</h2>
+  <input id="username" placeholder="Username">
+  <input id="password" type="password" placeholder="Password">
+  <button class="primary" id="loginBtn" style="margin-top:15px;">Login</button>
+  <p id="loginMsg" style="text-align:center; color:#ff5c5c; font-size:14px; margin-top:15px;"></p>
+ </div>
+</div>
+
+<div id="app" class="hidden">
+    <div class="sidebar">
+        <h2>🎓 Portal</h2>
+        <button data-page="todo" class="active"> Todo Tasks</button>
+        <button data-page="student"> Students</button>
+        <button data-page="product"> Products</button>
+        <button data-page="timer">Timer</button>
+        <button data-page="oop">Roles</button>
+        <button id="logoutBtn" style="margin-top: auto; color: #ff5c5c;"> Logout</button>
+    </div>
+
+    <div class="main">
+        <div id="todo" class="card page">
+            <h3>Task Manager</h3>
+            <div style="display: flex; gap: 10px;">
+                <input id="taskInput" placeholder="New task...">
+                <button class="primary" id="addTaskBtn" style="width: auto;">Add</button>
+            </div>
+            <ul id="taskList"></ul>
+        </div>
+
+        <div id="student" class="card page hidden">
+            <h3>Grades Analyzer</h3>
+            <input id="sname" placeholder="Student Name">
+            <div id="marks"></div>
+            <button class="primary" id="addStudentBtn">Calculate Results</button>
+            <div id="studentTable"></div>
+        </div>
+
+        <div id="product" class="card page hidden">
+            <h3>Inventory</h3>
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px;">
+                <input id="search" placeholder="Search...">
+                <select id="category">
+                    <option value="">All</option>
+                    <option value="tech">Tech</option>
+                    <option value="book">Book</option>
+                </select>
+            </div>
+            <div id="products" style="margin-top: 20px;"></div>
+        </div>
+
+        <div id="timer" class="card page hidden">
+            <div class="clock" id="clock">00:00:00</div>
+            <h3>Countdown</h3>
+            <div style="display: flex; gap: 10px;">
+                <input id="min" placeholder="Min" type="number">
+                <input id="sec" placeholder="Sec" type="number">
+            </div>
+            <button class="primary" id="startTimerBtn" style="margin-top:15px;">Start</button>
+            <div id="timerOut">--:--</div>
+        </div>
+
+        <div id="oop" class="card page hidden"></div>
+    </div>
+</div>
+
+<script>
+const $ = q => document.querySelector(q);
+const $$ = q => [...document.querySelectorAll(q)];
+
+const users = [
+    {username:"admin", password:"1234", locked:false, attempt:0},
+    {username:"student", password:"1111", locked:false, attempt:0}
+];
+
+const showAlert = (m) => {
+    const a = document.createElement("div");
+    a.className = "alert";
+    a.textContent = m;
+    document.body.appendChild(a);
+    setTimeout(() => a.remove(), 2500);
+};
+
+class User { constructor(name) { this.name = name; } }
+class AdminRole extends User { role() { return "System Administrator"; } }
+class StudentRole extends User { role() { return "University Student"; } }
+
+function updateRoles() {
+    const session = JSON.parse(localStorage.getItem("session"));
+    if(!session) return;
+    const currentUser = session.username.toLowerCase() === "admin" 
+        ? new AdminRole("Administrator") 
+        : new StudentRole(session.username);
+
+    $("#oop").innerHTML = `
+        <h3>System Role</h3>
+        <div style="text-align:center; padding: 20px; border-top: 1px solid var(--glass-border);">
+            <p>Welcome, <strong style="color:var(--primary); font-size: 1.2rem;">${currentUser.name}</strong></p>
+            <p style="margin-top:10px;">Access Level: <strong>${currentUser.role()}</strong></p>
+        </div>`;
+}
+
+$("#loginBtn").addEventListener("click", () => {
+    const user = users.find(u => u.username === $("#username").value);
+    if(!user) return $("#loginMsg").textContent = "User not found";
+    if(user.locked) return $("#loginMsg").textContent = "Account locked";
+
+    if(user.password === $("#password").value) {
+        localStorage.setItem("session", JSON.stringify(user));
+        startApp();
+    } else {
+        user.attempt++;
+        if(user.attempt >= 3) {
+            user.locked = true;
+            $("#loginMsg").textContent = "Locked due to attempts";
+        } else {
+            $("#loginMsg").textContent = "Incorrect password";
+        }
+    }
+});
+
+function startApp() {
+    $("#loginScreen").classList.add("hidden");
+    $("#app").classList.remove("hidden");
+    $("#app").style.display = "flex";
+    updateRoles();
+}
+
+if(localStorage.getItem("session")) startApp();
+
+$("#logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("session");
+    location.reload();
+});
+
+$$(".sidebar button[data-page]").forEach(btn => {
+    btn.addEventListener("click", () => {
+        $$(".page").forEach(p => p.classList.add("hidden"));
+        $$(".sidebar button").forEach(b => b.classList.remove("active"));
+        $("#" + btn.dataset.page).classList.remove("hidden");
+        btn.classList.add("active");
+    });
+});
+
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+const renderTasks = () => {
+    $("#taskList").innerHTML = tasks.map(t => `
+        <li class="${t.done ? 'task-done' : ''}">
+            <span>${t.title}</span>
+            <button class="primary" style="width:auto; padding: 5px 10px;" data-id="${t.id}">${t.done ? '↩' : '✔'}</button>
+        </li>`).join("");
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+};
+
+$("#addTaskBtn").addEventListener("click", () => {
+    const val = $("#taskInput").value.trim();
+    if(!val) return;
+    tasks.push({id: Date.now(), title: val, done: false});
+    $("#taskInput").value = "";
+    renderTasks();
+});
+
+$("#taskList").addEventListener("click", e => {
+    const id = e.target.dataset.id;
+    if(!id) return;
+    tasks = tasks.map(t => t.id == id ? {...t, done: !t.done} : t);
+    renderTasks();
+});
+renderTasks();
+
+const marksContainer = $("#marks");
+for(let i=0; i<5; i++) marksContainer.innerHTML += `<input class="mark" type="number" placeholder="Mark ${i+1}">`;
+
+let students = [];
+$("#addStudentBtn").addEventListener("click", () => {
+    const m = $$(".mark").map(x => +x.value);
+    if(m.some(x => x < 0 || x > 100)) return showAlert("Invalid marks (0-100)");
+    const total = m.reduce((a,b) => a+b, 0);
+    const avg = total/5;
+    const fail = m.some(x => x < 40);
+    students.push({name: $("#sname").value || "Student", total, avg, grade: fail ? "Fail" : avg >= 80 ? "A" : "B"});
+    $("#studentTable").innerHTML = `
+    <table>
+        <tr><th>Name</th><th>Total</th><th>Avg</th><th>Grade</th></tr>
+        ${students.map(s => `<tr><td>${s.name}</td><td>${s.total}</td><td>${s.avg}%</td><td class="${s.grade == "Fail" ? 'fail' : ''}">${s.grade}</td></tr>`).join("")}
+    </table>`;
+});
+
+const productData = [
+    {name:"Laptop Pro", category:"tech", price:55000},
+    {name:"Smart Phone", category:"tech", price:22000},
+    {name:"JS Textbook", category:"book", price:750}
+];
+
+const renderProducts = list => {
+    $("#products").innerHTML = list.map(p => `
+        <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid var(--glass-border);">
+            <span>${p.name} <small>(${p.category})</small></span>
+            <strong>₹${p.price}</strong>
+        </div>`).join("");
+};
+
+const filterProducts = () => {
+    let list = [...productData];
+    list = list.filter(p => p.name.toLowerCase().includes($("#search").value.toLowerCase()));
+    if($("#category").value) list = list.filter(p => p.category === $("#category").value);
+    renderProducts(list);
+};
+$("#search").addEventListener("input", filterProducts);
+$("#category").addEventListener("change", filterProducts);
+renderProducts(productData);
+
+setInterval(() => $("#clock").textContent = new Date().toLocaleTimeString(), 1000);
+
+let tInt;
+$("#startTimerBtn").addEventListener("click", () => {
+    let t = (+$("#min").value || 0) * 60 + (+$("#sec").value || 0);
+    if(t <= 0) return;
+    clearInterval(tInt);
+    tInt = setInterval(() => {
+        const mm = Math.floor(t / 60).toString().padStart(2, '0');
+        const ss = (t % 60).toString().padStart(2, '0');
+        $("#timerOut").textContent = `${mm}:${ss}`;
+        if(t-- <= 0) {
+            clearInterval(tInt);
+            showAlert("Timer Finished!");
+        }
+    }, 1000);
+});
+</script>
+</body>
+</html>
